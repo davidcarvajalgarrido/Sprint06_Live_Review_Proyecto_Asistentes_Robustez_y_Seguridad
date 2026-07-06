@@ -1,4 +1,4 @@
-![Cabecera](../../assets/cabecera_gemini.png)
+![Cabecera](./assets/cabecera_thebridge.png)
 
 # Práctica Sprint 06 — De prototipo a asistente robusto
 
