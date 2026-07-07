@@ -233,3 +233,15 @@ main()
 | **API** | gemini_client.py | Capa 4: Comunicación con Gemini |
 | **Config** | config.py | Capa transversal: Constantes globales |
 | **Auth** | gemini_auth.py | Capa transversal: Autenticación |
+
+## 🔗 Resumen de Dependencias Entre Capas
+
+- **main.py** → logic.py, context.py
+- **logic.py** → validators.py, prompts.py, context.py, state.py, gemini_client.py
+- **prompts.py** → (solo constantes de config)
+- **state.py** → (sin dependencias internas)
+- **context.py** → (sin dependencias internas, lee datos de disco)
+- **validators.py** → (solo constantes de config)
+- **gemini_client.py** → gemini_auth.py, config
+- **config.py** → (no depende de nada)
+- **gemini_auth.py** → (dependencias externas: dotenv, getpass, os)
