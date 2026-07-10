@@ -31,7 +31,17 @@ def build_faq_block(faq_entries: list[dict]) -> str:
 
     Ver README Fase 1, Tarea 2.
     """
-    raise NotImplementedError("Implementa build_faq_block()")
+    if not faq_entries:
+        return ""
+    lines = ["--- FAQ (referencia seleccionada) ---"]
+    for entry in faq_entries:
+        lines.append(f"P: {entry.get('question', '')}")
+        lines.append(f"R: {entry.get('answer', '')}")
+        lines.append("")
+    lines.append("--- FIN FAQ ---")
+    return "\n".join(lines)
+
+    # raise NotImplementedError("Implementa build_faq_block()")
 
 
 def build_history_block(messages: list[dict]) -> str:
@@ -42,7 +52,12 @@ def build_history_block(messages: list[dict]) -> str:
 
     Ver README Fase 1, Tarea 3.
     """
-    raise NotImplementedError("Implementa build_history_block()")
+
+    if not messages:
+        return "(sin turnos previos en la ventana)"
+    return "\n".join(f"{m['role']}: {m['text']}" for m in messages)
+
+    # raise NotImplementedError("Implementa build_history_block()")
 
 
 def build_assistant_prompt(
@@ -60,7 +75,35 @@ def build_assistant_prompt(
 
     Ver README Fase 1, Tarea 4 (incluye pseudocódigo).
     """
-    raise NotImplementedError("Implementa build_assistant_prompt()")
+
+    perfil = resolver_perfil(assistant_config)
+    profile = user_state.get("user_profile", {})
+    faq_entries = extra_context or []
+    recent = recent_messages or []
+
+    return f"""
+{perfil["rol"]}
+
+Instrucciones del tutor de estudio del bootcamp:
+- Responde en {assistant_config["idioma_respuesta"]}.
+- Nivel de explicación del perfil: {perfil["nivel_explicacion"]}.
+- Máximo aproximado: {assistant_config["max_palabras"]} palabras.
+
+Perfil del usuario:
+- Nombre: {profile.get("nombre") or "(desconocido)"}
+- Nivel declarado: {profile.get("nivel", "junior")}
+- Tema actual: {profile.get("tema_actual") or "(sin tema fijado)"}
+
+{build_faq_block(faq_entries)}
+
+Historial reciente:
+{build_history_block(recent)}
+
+Mensaje actual del usuario:
+{user_message.strip()}
+""".strip()
+
+    # raise NotImplementedError("Implementa build_assistant_prompt()")
 
 
 def build_vulnerable_prompt(user_message: str) -> str:

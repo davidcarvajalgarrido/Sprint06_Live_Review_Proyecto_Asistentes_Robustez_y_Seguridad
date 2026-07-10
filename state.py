@@ -47,4 +47,18 @@ def actualizar_perfil_desde_mensaje(state: dict, mensaje: str) -> None:
 
     Ver README Fase 1, Tarea 1 (incluye pseudocódigo).
     """
-    raise NotImplementedError("Implementa actualizar_perfil_desde_mensaje()")
+    msg = mensaje.lower()
+    profile = state.setdefault("user_profile", {})
+
+    if "me llamo" in msg:
+        resto = mensaje.lower().split("me llamo", 1)[-1].strip().strip(".")
+        if resto:
+            profile["nombre"] = resto.split()[0].capitalize()
+
+    if "estudio" in msg or "estudiando" in msg:
+        for tema in ("assistant engineering", "context engineering", "prompt engineering"):
+            if tema in msg:
+                profile["tema_actual"] = tema.title()
+                break
+
+    # raise NotImplementedError("Implementa actualizar_perfil_desde_mensaje()")

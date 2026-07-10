@@ -14,11 +14,29 @@ Funciones ya implementadas (código dado):
   - `respuesta_ok`, `respuesta_error`, `crear_estado_demo`, `demo_seleccion_faq`
 """
 
+import json
 from pathlib import Path
 
+from config import ASSISTANT_CONFIG_DEFAULT, TEMPERATURE, TEMPERATURE_VULNERABLE
 from context import cargar_faq, seleccionar_faq
-from gemini_client import MetricasLlamada
-from state import inicializar_estado
+from gemini_client import MetricasLlamada, safe_generate
+from prompts import (
+    build_assistant_prompt,
+    build_secure_prompt,
+    build_vulnerable_prompt,
+)
+from state import (
+    actualizar_perfil_desde_mensaje,
+    append_assistant,
+    append_user,
+    inicializar_estado,
+    ultimos_n,
+)
+from validators import (
+    parece_dominio_python,
+    rechazo_fuera_de_dominio,
+    validate_input,
+)
 
 
 def respuesta_ok(mensaje: str, data: dict | None = None) -> dict:
@@ -50,7 +68,39 @@ def procesar_turno(
 
     Ver README Fase 1, Tarea 5 (incluye pseudocódigo).
     """
-    raise NotImplementedError("Implementa procesar_turno()")
+    if not user_message.strip():
+        return respuesta_error("Mensaje vacío", ["El mensaje no puede estar vacío."])
+
+    config = assistant_config or ASSISTANT_CONFIG_DEFAULT.copy()
+    ventana = config.get("max_turnos_historial", 6)
+
+    prompt = build_assistant_prompt(
+        assistant_config=config,
+        user_state=state,
+        user_message=user_message,
+        extra_context=faq_entries or [],
+        recent_messages=ultimos_n(state, ventana),
+    )
+
+    try:
+        texto, metricas = safe_generate(prompt, temperature=config["temperature"])
+    except ValueError as e:
+        return respuesta_error("Error de contexto", [str(e)])
+
+    actualizar_perfil_desde_mensaje(state, user_message)
+    append_user(state, user_message)
+    append_assistant(state, texto)
+
+    return respuesta_ok(
+        "Turno completado",
+        {
+            "respuesta": texto,
+            "perfil_activo": config["perfil_activo"],
+            "metricas": _metricas_a_dict(metricas),
+        },
+    )
+
+    # raise NotImplementedError("Implementa procesar_turno()")
 
 
 def crear_estado_demo() -> dict:

@@ -153,12 +153,16 @@ def demo_comparativa_seguridad() -> None:
 
 def main() -> None:
     demo_verificar_estructura()
+
+    # Fase 1: arquitectura del asistente
     try:
         demo_perfiles()
         demo_memoria()
         demo_faq()
     except NotImplementedError as e:
         print(f"\n[PENDIENTE — arquitectura] {e}\n")
+    
+    # Fase 2: comparativa vulnerable vs seguro
     try:
         demo_comparativa_seguridad()
     except NotImplementedError as e:
